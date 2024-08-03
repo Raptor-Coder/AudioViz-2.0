@@ -195,3 +195,51 @@ const visualizations = ['Spectrum Bars', 'Circular Wave', 'Particle System', 'Fr
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = Math.min(centerX, centerY) * 0.8;
+
+            ctx.beginPath();
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const angle = i / bufferLength * Math.PI * 2;
+                const x = centerX + Math.cos(angle) * radius * v;
+                const y = centerY + Math.sin(angle) * radius * v;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawParticleSystem() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const particles = 100;
+            const avgFrequency = dataArray.reduce((a, b) => a + b) / bufferLength;
+            const particleSize = avgFrequency / 10;
+
+            for (let i = 0; i < particles; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const size = particleSize + (Math.random() * 5);
+                const hue = (avgFrequency + i) % 360;
+
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.8)`;
+                ctx.fill();
+            }
+        }
+
+        function drawFractalTree() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
