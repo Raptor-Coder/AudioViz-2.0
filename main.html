@@ -291,3 +291,52 @@ const visualizations = ['Spectrum Bars', 'Circular Wave', 'Particle System', 'Fr
                 const radius = angle * 5 * amplitude * (avgFrequency / 128);
                 const x = centerX + Math.cos(angle) * radius;
                 const y = centerY + Math.sin(angle) * radius;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.strokeStyle = `hsl(${avgFrequency}, 100%, 50%)`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawFrequencyDots() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const rows = 32;
+            const cols = bufferLength / rows;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const row = Math.floor(i / cols);
+                const col = i % cols;
+                const x = col * cellWidth + cellWidth / 2;
+                const y = row * cellHeight + cellHeight / 2;
+                const radius = dataArray[i] / 255 * cellHeight / 2;
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = `hsl(${dataArray[i]}, 100%, 50%)`;
+                ctx.fill();
+            }
+        }
+
+        function visualize() {
+            switch (visualizations[currentVisualization]) {
+                case 'Spectrum Bars':
+                    drawSpectrumBars();
+                    break;
+                case 'Circular Wave':
+                    drawCircularWave();
+                    break;
+                case 'Particle System':
+                    drawParticleSystem();
+                    break;
