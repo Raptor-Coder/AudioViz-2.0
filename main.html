@@ -243,3 +243,51 @@ const visualizations = ['Spectrum Bars', 'Circular Wave', 'Particle System', 'Fr
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const avgFrequency = dataArray.reduce((a, b) => a + b) / bufferLength;
+            const maxDepth = Math.floor(avgFrequency / 25) + 5;
+
+            function drawBranch(x, y, length, angle, depth) {
+                if (depth === 0) return;
+
+                const endX = x + length * Math.cos(angle);
+                const endY = y + length * Math.sin(angle);
+
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = `hsl(${depth * 30}, 100%, 50%)`;
+                ctx.lineWidth = depth;
+                ctx.stroke();
+
+                const newLength = length * 0.7;
+                const newDepth = depth - 1;
+                const angleChange = Math.PI / 4 * (dataArray[depth] / 255);
+
+                drawBranch(endX, endY, newLength, angle - angleChange, newDepth);
+                drawBranch(endX, endY, newLength, angle + angleChange, newDepth);
+            }
+
+            drawBranch(canvas.width / 2, canvas.height, canvas.height / 4, -Math.PI / 2, maxDepth);
+        }
+
+        function drawSpiral() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const avgFrequency = dataArray.reduce((a, b) => a + b) / bufferLength;
+
+            ctx.beginPath();
+            for (let i = 0; i < bufferLength; i++) {
+                const amplitude = dataArray[i] / 255;
+                const angle = i / bufferLength * Math.PI * 20;
+                const radius = angle * 5 * amplitude * (avgFrequency / 128);
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
