@@ -340,3 +340,56 @@ const visualizations = ['Spectrum Bars', 'Circular Wave', 'Particle System', 'Fr
                 case 'Particle System':
                     drawParticleSystem();
                     break;
+ case 'Fractal Tree':
+                    drawFractalTree();
+                    break;
+                case 'Spiral':
+                    drawSpiral();
+                    break;
+                case 'Frequency Dots':
+                    drawFrequencyDots();
+                    break;
+            }
+            document.getElementById('vizName').textContent = visualizations[currentVisualization];
+            animationId = requestAnimationFrame(visualize);
+        }
+
+        function togglePlayPause() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            if (playlist[currentTrackIndex].audio.paused) {
+                playlist[currentTrackIndex].audio.play();
+                document.getElementById('playPause').textContent = 'Pause';
+                document.getElementById('songInfo').classList.add('pulse');
+            } else {
+                playlist[currentTrackIndex].audio.pause();
+                document.getElementById('playPause').textContent = 'Play';
+                document.getElementById('songInfo').classList.remove('pulse');
+            }
+        }
+
+        function changeVisualization(direction) {
+            currentVisualization = (currentVisualization + direction + visualizations.length) % visualizations.length;
+        }
+
+        function uploadMusic(event) {
+            const files = event.target.files;
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const audio = new Audio(e.target.result);
+                    audio.addEventListener('ended', playNextTrack);
+                    playlist.push({ audio, name: file.name });
+                    updatePlaylistUI();
+                };
+                reader.readAsDataURL(file);
+            }
+            if (playlist.length === 1) {
+                currentTrackIndex = 0;
+                setupCurrentTrack();
+            }
+        }
+
+        function updatePlaylistUI() {
