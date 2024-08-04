@@ -393,3 +393,70 @@ const visualizations = ['Spectrum Bars', 'Circular Wave', 'Particle System', 'Fr
         }
 
         function updatePlaylistUI() {
+const playlistElement = document.getElementById('playlistItems');
+            playlistElement.innerHTML = '';
+            playlist.forEach((track, index) => {
+                const li = document.createElement('li');
+                li.textContent = track.name;
+                li.onclick = () => playTrack(index);
+                playlistElement.appendChild(li);
+            });
+        }
+
+        function playTrack(index) {
+            if (currentTrackIndex !== index) {
+                playlist[currentTrackIndex].audio.pause();
+                currentTrackIndex = index;
+                setupCurrentTrack();
+                playlist[currentTrackIndex].audio.play();
+                document.getElementById('playPause').textContent = 'Pause';
+            }
+        }
+
+        function setupCurrentTrack() {
+            if (playlist.length > 0) {
+                const currentTrack = playlist[currentTrackIndex];
+                document.getElementById('songInfo').textContent = `Now playing: ${currentTrack.name}`;
+                
+                if (source) {
+                    source.disconnect();
+                }
+                source = audioContext.createMediaElementSource(currentTrack.audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+            }
+        }
+
+        function playNextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            setupCurrentTrack();
+            playlist[currentTrackIndex].audio.play();
+        }
+
+        function setVolume() {
+            const volume = document.getElementById('volumeSlider').value;
+            playlist.forEach(track => {
+                track.audio.volume = volume;
+            });
+        }
+
+        function togglePlaylist() {
+            const playlist = document.getElementById('playlist');
+            playlist.classList.toggle('hidden');
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+
+            document.getElementById('playPause').addEventListener('click', togglePlayPause);
+            document.getElementById('prevViz').addEventListener('click', () => changeVisualization(-1));
+            document.getElementById('nextViz').addEventListener('click', () => changeVisualization(1));
+            document.getElementById('uploadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+            document.getElementById('fileInput').addEventListener('change', uploadMusic);
+            document.getElementById('volumeSlider').addEventListener('input', setVolume);
+            document.getElementById('togglePlaylist').addEventListener('click', togglePlaylist);
+
+            visualize();
+        });
+    </script>
+</body></html>
